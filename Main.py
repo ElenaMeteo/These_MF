@@ -117,6 +117,8 @@ apres_1DVa = np.array([
     for i in range(prevVa.shape[0])
 ]).ravel()
 
+print("check funcion:", np.array_equal(avant_1DV, apres_1DV))
+
 # Variables de contrôle
 mediaV_1l_av = np.mean(avant_1DV_1l)
 varV_1l_av = np.var(avant_1DV_1l)
@@ -183,6 +185,8 @@ graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=True)
 prevV_ap = apres_1DV.reshape(-1, kV)
 prevVa_ap = apres_1DVa.reshape(-1, kVa)
 
+print("check funcion2:", np.array_equal(prevV, prevV_ap))
+
 condV50_ap, EtheoV50_ap, EobsV50_ap, NpV50_ap, pPrimeV50_ap, pcV50_ap, HV50_ap, FV50_ap = mainExec(obsV, prevV_ap, kV, NV, 50)
 condV90_ap, EtheoV90_ap, EobsV90_ap, NpV90_ap, pPrimeV90_ap, pcV90_ap, HV90_ap, FV90_ap = mainExec(obsV, prevV_ap, kV, NV, 90)
 
@@ -242,4 +246,7 @@ rmseVa_av, varVa_lignes_av = RMSEcheck(prevVa, obsVa)
 rmseVa_ap, varVa_lignes_ap = RMSEcheck(prevVa_ap, obsVa)
 
 print("Vent obs avant: RMSE, variance", rmseV_av, varV_lignes_av)
-print("Vent obs apres: RMSE, variance", rmseV_av, varV_lignes_av)
+print("Vent obs apres: RMSE, variance", rmseV_ap, varV_lignes_ap)
+
+print("Vent ana avant: RMSE, variance", rmseVa_av, varVa_lignes_av)
+print("Vent ana apres: RMSE, variance", rmseVa_ap, varVa_lignes_ap)

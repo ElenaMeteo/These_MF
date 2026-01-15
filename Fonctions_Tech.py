@@ -152,6 +152,7 @@ def param_vent (maille, y, obs):
     return mu, sigma_repre
 
 def conv_vent (y, nVal, obs):
+    y = y.copy()
     mu, sigma_repre = param_vent(delta, y, obs)
 
     sigma_mesure = np.maximum(0.2, 0.05*obs)
@@ -176,5 +177,5 @@ def conv_vent (y, nVal, obs):
 def RMSEcheck (prev, obs):
     prev_mean = prev.mean(axis=1)
     rmse = np.sqrt(np.mean((prev_mean - obs)**2))
-    var = prev.var(axis=1)
+    var = np.sqrt(np.mean(prev.var(axis=1)))
     return rmse, var
