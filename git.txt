@@ -1,0 +1,4 @@
+git pull         # Traer cambios de GitHub antes de trabajar
+git add .
+git commit -m "mensaje"
+git push         # Subir tus cambios
