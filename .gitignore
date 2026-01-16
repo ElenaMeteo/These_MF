@@ -1,4 +1,6 @@
-*.txt
+donnees_test_temperature.txt
+donnees_test_vent_analyse.txt
+donnees_test_vent.txt
 *.pdf
 *.jpg
 *.png
