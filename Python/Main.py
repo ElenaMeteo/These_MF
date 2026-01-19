@@ -11,7 +11,7 @@ from pathlib import Path
 
 from Variables import *
 from Fonctions_Exec import mainExec, graphsExec
-from Fonctions_Tech import pointROC, conv_vent, RMSEcheck
+from Fonctions_Tech import pointROC, conv_vent, sigmaMean, RMSEcheck
 from Fonctions_Graph import graphic_pdf_cdf
 
 np.set_printoptions(threshold=np.inf)
@@ -28,9 +28,9 @@ ruta_T  = BASE_DIR / "Data" / "donnees_test_temperature.txt"
 ruta_V  = BASE_DIR / "Data" / "donnees_test_vent.txt"
 ruta_Va = BASE_DIR / "Data" / "donnees_test_vent_analyse.txt"
 
-dfT = pd.read_csv(ruta_T, delim_whitespace=True, header=None)
-dfV = pd.read_csv(ruta_V, delim_whitespace=True, header=None)
-dfVa = pd.read_csv(ruta_Va, delim_whitespace=True, header=None)
+dfT = pd.read_csv(ruta_T, sep=r'\s+', header=None)
+dfV = pd.read_csv(ruta_V, sep=r'\s+', header=None)
+dfVa = pd.read_csv(ruta_Va, sep=r'\s+', header=None)
 
 obsT = dfT.iloc[:, -1]
 prevT = dfT.iloc[:, 0:kT].to_numpy()
@@ -151,16 +151,19 @@ varVa_ap = np.var(apres_1DVa)
 # meanV_ap_lpl = np.mean(var_samplesV)
 # meanVa_ap_lpl = np.mean(var_samplesVa)
 
-print("Moyenne 1l vent obs avant/après:", mediaV_1l_av, mediaV_1l_ap)
+print("\nMoyenne 1l vent obs avant/après:", mediaV_1l_av, mediaV_1l_ap)
 print("Moyenne vent obs avant/après:", mediaV_av, mediaV_ap)
 print("Moyenne vent ana avant/après:", mediaVa_av, mediaVa_ap)
 
-print("Variance 1l vent obs avant/après:", varV_1l_av, varV_1l_ap)
+print("\nVariance 1l vent obs avant/après:", varV_1l_av, varV_1l_ap)
 print("Variance vent obs avant/après:", varV_av, varV_ap)
 print("Variance vent ana avant/après:", varVa_av, varVa_ap)
 
-# print("Moyenne de variance vent obs par lignes après:", meanV_ap_lpl)
-# print("Moyenne de variance vent ana par lignes après:", meanVa_ap_lpl)
+media_sigmaV = sigmaMean(prevV, obsV, delta)
+media_sigmaVa = sigmaMean(prevVa, obsVa, delta)
+
+print("\nLa variances des perturbations pour vent obs est:", media_sigmaV)
+print("La variances des perturbations pour vent ana est:", media_sigmaVa)
 
 dict_all = {
     "Avant perturbation 1l vent obs": avant_1DV_1l, 
@@ -176,14 +179,14 @@ titre_variable = "Distribution de probabilité"
 xlabel = "Prévisions"
 ylabel = "Fréquences relatives"
 
-graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=False)
+# graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=False)
 
 titre = "Distribution (cdf) des prévisions avant et aprés perturbation"
 titre_variable = "Distribution cummulée de probabilité"
 xlabel = "Prévisions"
 ylabel = "Fréquences cumulées"
 
-graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=True)
+# graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=True)
 
 "Si maintenant on réalise la même analyse que avant mais avec "
 "les valeurs corrigées, on va peut-être avoir des meilleurs "
@@ -194,8 +197,6 @@ graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=True)
 
 prevV_ap = apres_1DV.reshape(-1, kV)
 prevVa_ap = apres_1DVa.reshape(-1, kVa)
-
-print("check funcion2:", np.array_equal(prevV, prevV_ap))
 
 condV50_ap, EtheoV50_ap, EobsV50_ap, NpV50_ap, pPrimeV50_ap, pcV50_ap, HV50_ap, FV50_ap = mainExec(obsV, prevV_ap, kV, NV, 50)
 condV90_ap, EtheoV90_ap, EobsV90_ap, NpV90_ap, pPrimeV90_ap, pcV90_ap, HV90_ap, FV90_ap = mainExec(obsV, prevV_ap, kV, NV, 90)
@@ -216,17 +217,14 @@ dict_fiab_ap = {"Vent_obs_50_ap": two_pPrimeV50, "Vent_obs_90_ap": two_pPrimeV90
                 "Vent_analyse_50_ap": two_pPrimeVa50, "Vent_analyse_90_ap": two_pPrimeVa90
                 }
 
-# dict_fiab_ap = {"Vent_obs_50_ap": pPrimeV50_ap, "Vent_obs_90_ap": pPrimeV90_ap,
-#             "Vent_analyse_50": pPrimeVa50, "Vent_analyse_90": pPrimeVa90}
-
-# # Diagramme d'acuité
-# ####################
+# Diagramme d'acuité
+####################
 
 dict_acuite_ap = {"Vent_obs_50_ap": NpV50_ap, "Vent_obs_90_ap": NpV90_ap,
                 "Vent_analyse_50_ap": NpVa50_ap, "Vent_analyse_90_ap": NpVa50_ap}
 
-# # Courbe de ROC
-# ###############
+# Courbe de ROC
+###############
 
 FHV50_ap = np.vstack((FV50_ap, HV50_ap)).T
 FHV90_ap = np.vstack((FV90_ap, HV90_ap)).T
@@ -241,10 +239,7 @@ two_FHVa90 = np.hstack((FHVa90_ap, FHVa90))
 dict_ROC_ap = {"Vent_obs_50_ap": two_FHV50, "Vent_obs_90_ap": two_FHV90,
             "Vent_analyse_50_ap": two_FHVa50, "Vent_analyse_90_ap": two_FHVa90}
 
-# dict_ROC_ap = {"Vent_obs_50_ap": FHV50_ap, "Vent_obs_90_ap": FHV90_ap,
-#             "Vent_analyse_50_ap": FHVa50_ap, "Vent_analyse_90_ap": FHVa90_ap}
-
-graphsExec(Fiab, Acuite, ROC, dict_fiab_ap, pc_ap, dict_acuite_ap, dict_ROC_ap, [50, 90], 2)
+# graphsExec(Fiab, Acuite, ROC, dict_fiab_ap, pc_ap, dict_acuite_ap, dict_ROC_ap, [50, 90], 2)
 
 # RMSE VS. VARIANCE
 ###################
@@ -255,8 +250,35 @@ rmseV_ap, varV_lignes_ap = RMSEcheck(prevV_ap, obsV)
 rmseVa_av, varVa_lignes_av = RMSEcheck(prevVa, obsVa)
 rmseVa_ap, varVa_lignes_ap = RMSEcheck(prevVa_ap, obsVa)
 
-print("Vent obs avant: RMSE, variance", rmseV_av, varV_lignes_av)
+print("\nVent obs avant: RMSE, variance", rmseV_av, varV_lignes_av)
 print("Vent obs apres: RMSE, variance", rmseV_ap, varV_lignes_ap)
 
-print("Vent ana avant: RMSE, variance", rmseVa_av, varVa_lignes_av)
+print("\nVent ana avant: RMSE, variance", rmseVa_av, varVa_lignes_av)
 print("Vent ana apres: RMSE, variance", rmseVa_ap, varVa_lignes_ap)
+
+# Calcul des sigmas correspondents
+##################################
+
+# sigma = 10
+
+sigma_meanV10 = sigmaMean(prevV, obsV, delta10)
+sigma_meanVa10 = sigmaMean(prevVa, obsVa, delta10)
+
+print("\nLa variances des perturbations pour vent obs et delta = 10 est:", sigma_meanV10)
+print("La variances des perturbations pour vent ana et delta = 10 est:", sigma_meanVa10)
+
+# sigma = 15
+
+sigma_meanV15 = sigmaMean(prevV, obsV, delta15)
+sigma_meanVa15 = sigmaMean(prevVa, obsVa, delta15)
+
+print("\nLa variances des perturbations pour vent obs et delta = 15 est:", sigma_meanV15)
+print("La variances des perturbations pour vent ana et delta = 15 est:", sigma_meanVa15)
+
+# sigma = 20
+
+sigma_meanV20 = sigmaMean(prevV, obsV, delta20)
+sigma_meanVa20 = sigmaMean(prevVa, obsVa, delta20)
+
+print("\nLa variances des perturbations pour vent obs et delta = 20 est:", sigma_meanV20)
+print("La variances des perturbations pour vent ana et delta = 20 est:", sigma_meanVa20)

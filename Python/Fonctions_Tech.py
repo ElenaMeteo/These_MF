@@ -139,7 +139,7 @@ pPrime_vector = pPrime(obs, prob_vector, Np_vector)
 
 " Fonctions pour le vent à 10m "
 
-def param_vent (maille, y, obs):
+def param_vent (maille, y):
     # Ici delta c'est le pas du maillage
     moy_y = y.sum()/(len(y))
     alpha0 = -0.02*maille
@@ -153,7 +153,7 @@ def param_vent (maille, y, obs):
 
 def conv_vent (y, nVal, obs):
     y = y.copy()
-    mu, sigma_repre = param_vent(delta, y, obs)
+    mu, sigma_repre = param_vent(delta, y)
 
     sigma_mesure = np.maximum(0.2, 0.05*obs)
     sigma = np.sqrt(sigma_mesure**2 + sigma_repre**2)
@@ -173,6 +173,15 @@ def conv_vent (y, nVal, obs):
 
     # return y, var_samples
     return y
+
+def sigmaMean (bd, obs, delta):
+    beta = -0.04*delta + 0.17*delta**(0.75)
+    moy_y = bd.mean(axis=1)
+    sigma_repre = beta * np.sqrt(moy_y) + epsilon
+    sigma_mesure = np.maximum(0.2, 0.05 * obs)
+    sigma_mean = np.sqrt(sigma_mesure**2 + sigma_repre**2).mean()
+
+    return sigma_mean
 
 def RMSEcheck (prev, obs):
     prev_mean = prev.mean(axis=1)

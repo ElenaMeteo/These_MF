@@ -13,4 +13,9 @@ NVa = 12600
 # Variables vent
 delta = 7
 epsilon = 0.01
+# Ordres de grandeur de la maille
+delta10 = 10
+delta15 = 15
+delta20 = 20
+
 
