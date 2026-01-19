@@ -12,7 +12,7 @@ from pathlib import Path
 from Variables import *
 from Fonctions_Exec import mainExec, graphsExec
 from Fonctions_Tech import pointROC, conv_vent, sigmaMean, RMSEcheck
-from Fonctions_Graph import graphic_pdf_cdf
+from Fonctions_Graph import graphic_pdf_cdf, graph_simple
 
 np.set_printoptions(threshold=np.inf)
 
@@ -241,20 +241,43 @@ dict_ROC_ap = {"Vent_obs_50_ap": two_FHV50, "Vent_obs_90_ap": two_FHV90,
 
 # graphsExec(Fiab, Acuite, ROC, dict_fiab_ap, pc_ap, dict_acuite_ap, dict_ROC_ap, [50, 90], 2)
 
-# RMSE VS. VARIANCE
-###################
+# RMSE VS. ÉCART-TYPE
+#####################
 
-rmseV_av, varV_lignes_av = RMSEcheck(prevV, obsV)
-rmseV_ap, varV_lignes_ap = RMSEcheck(prevV_ap, obsV)
+rmseV_av = []
+rmseV_ap = []
+ectV_av = []
+ectV_ap = []
 
-rmseVa_av, varVa_lignes_av = RMSEcheck(prevVa, obsVa)
-rmseVa_ap, varVa_lignes_ap = RMSEcheck(prevVa_ap, obsVa)
+rmseVa_av = []
+rmseVa_ap = []
+ectVa_av = []
+ectVa_ap = []
 
-print("\nVent obs avant: RMSE, variance", rmseV_av, varV_lignes_av)
-print("Vent obs apres: RMSE, variance", rmseV_ap, varV_lignes_ap)
+rmseV_av.append(RMSEcheck(prevV, obsV)[0])
+ectV_av.append(RMSEcheck(prevV, obsV)[1])
 
-print("\nVent ana avant: RMSE, variance", rmseVa_av, varVa_lignes_av)
-print("Vent ana apres: RMSE, variance", rmseVa_ap, varVa_lignes_ap)
+rmseV_ap.append(RMSEcheck(prevV_ap, obsV)[0])
+ectV_ap.append(RMSEcheck(prevV_ap, obsV)[1])
+
+rmseVa_av.append(RMSEcheck(prevVa, obsVa)[0])
+ectVa_av.append(RMSEcheck(prevVa, obsVa)[1])
+
+rmseVa_ap.append(RMSEcheck(prevVa_ap, obsVa)[0])
+ectVa_ap.append(RMSEcheck(prevVa_ap, obsVa)[1])
+
+
+# rmseV_av, ectV_lignes_av = RMSEcheck(prevV, obsV)
+# rmseV_ap, ectV_lignes_ap = RMSEcheck(prevV_ap, obsV)
+
+# rmseVa_av, ectVa_lignes_av = RMSEcheck(prevVa, obsVa)
+# rmseVa_ap, ectVa_lignes_ap = RMSEcheck(prevVa_ap, obsVa)
+
+print("Vent obs avant: RMSE, écart type", rmseV_av, ectV_av)
+print("Vent obs apres: RMSE, écart type", rmseV_ap, ectV_ap)
+
+print("Vent ana avant: RMSE, écart type", rmseVa_av, ectVa_av)
+print("Vent ana apres: RMSE, écart type", rmseVa_ap, ectVa_ap)
 
 # Calcul des sigmas correspondents
 ##################################
@@ -282,3 +305,53 @@ sigma_meanVa20 = sigmaMean(prevVa, obsVa, delta20)
 
 print("\nLa variances des perturbations pour vent obs et delta = 20 est:", sigma_meanV20)
 print("La variances des perturbations pour vent ana et delta = 20 est:", sigma_meanVa20)
+
+# RMSE vs. écart-type (variation maille)
+########################################
+
+# delta = 10
+
+apres10_1DV = np.array([
+    conv_vent(prevV[i, :], kV, obsV[i], delta10)
+    for i in range(prevV.shape[0])
+]).ravel()
+
+prevV10_ap = apres10_1DV.reshape(-1, kV)
+rmseV_ap.append(RMSEcheck(prevV10_ap, obsV)[0])
+ectV_ap.append(RMSEcheck(prevV10_ap, obsV)[1])
+
+# delta = 15
+
+apres15_1DV = np.array([
+    conv_vent(prevV[i, :], kV, obsV[i], delta15)
+    for i in range(prevV.shape[0])
+]).ravel()
+
+prevV15_ap = apres15_1DV.reshape(-1, kV)
+rmseV_ap.append(RMSEcheck(prevV15_ap, obsV)[0])
+ectV_ap.append(RMSEcheck(prevV15_ap, obsV)[1])
+
+# delta = 20
+
+apres20_1DV = np.array([
+    conv_vent(prevV[i, :], kV, obsV[i], delta20)
+    for i in range(prevV.shape[0])
+]).ravel()
+
+prevV20_ap = apres20_1DV.reshape(-1, kV)
+rmseV_ap.append(RMSEcheck(prevV20_ap, obsV)[0])
+ectV_ap.append(RMSEcheck(prevV20_ap, obsV)[1])
+
+
+# Vecteur
+delta_vector = [delta, delta10, delta15, delta20]
+
+# Rapport des deux vecteurs
+rmseV_ap = np.array(rmseV_ap)
+ectV_ap = np.array(ectV_ap)
+rapportV_ap = rmseV_ap/ectV_ap
+
+titre_variable = "Score RMSE en fonction du maillage"
+xlabel = "Maillage (km)"
+ylabel = "Rapport RMSE/ect"
+graph_simple(delta_vector, rapportV_ap, titre_variable, xlabel, ylabel)

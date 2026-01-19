@@ -151,9 +151,9 @@ def param_vent (maille, y):
 
     return mu, sigma_repre
 
-def conv_vent (y, nVal, obs):
+def conv_vent (y, nVal, obs, maille):
     y = y.copy()
-    mu, sigma_repre = param_vent(delta, y)
+    mu, sigma_repre = param_vent(maille, y)
 
     sigma_mesure = np.maximum(0.2, 0.05*obs)
     sigma = np.sqrt(sigma_mesure**2 + sigma_repre**2)

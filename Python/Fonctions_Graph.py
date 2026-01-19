@@ -121,3 +121,17 @@ def graphic_pdf_cdf (dictionnaire, nPer, nVar, titre, titre_variable, xlabel, yl
 
     plt.tight_layout()
     plt.show()
+
+
+def graph_simple(x, y, titre_variable, xlabel, ylabel):
+    plt.figure()
+    plt.plot(x, y, '-', color='blue')
+    plt.plot(x, y, 'x', color='black')
+
+    plt.title(titre_variable)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    plt.grid(True)
+
+    plt.show()
