@@ -16,6 +16,7 @@ epsilon = 0.01
 # Ordres de grandeur de la maille
 delta10 = 10
 delta15 = 15
+delta17 = 17
 delta20 = 20
 
 

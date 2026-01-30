@@ -114,16 +114,16 @@ pointROC(dict_ROC, kT)
 ###########################
 
 avant_1DV_1l = prevV[0,:].ravel()
-apres_1DV_1l = conv_vent(prevV[0,:], kV, obsV[0]) 
+apres_1DV_1l = conv_vent(prevV[0,:], kV, obsV[0], delta) 
 "On fait ça pour controler ligne par ligne aussi (on regarde ce qu'il se passe sur la 1ere)"
 avant_1DV = prevV.ravel()
 apres_1DV = np.array([
-    conv_vent(prevV[i, :], kV, obsV[i])
+    conv_vent(prevV[i, :], kV, obsV[i], delta)
     for i in range(prevV.shape[0])
 ]).ravel()
 avant_1DVa = prevVa.ravel()
 apres_1DVa = np.array([
-    conv_vent(prevVa[i, :], kVa, obsVa[i])
+    conv_vent(prevVa[i, :], kVa, obsVa[i], delta)
     for i in range(prevVa.shape[0])
 ]).ravel()
 
@@ -166,12 +166,12 @@ print("\nLa variances des perturbations pour vent obs est:", media_sigmaV)
 print("La variances des perturbations pour vent ana est:", media_sigmaVa)
 
 dict_all = {
-    "Avant perturbation 1l vent obs": avant_1DV_1l, 
-    "Après perturbation 1l vent obs": apres_1DV_1l,
-    "Avant perturbation vent obs": avant_1DV, 
-    "Après perturbation vent obs": apres_1DV,
-    "Avant perturbation vent ana": avant_1DVa, 
-    "Après perturbation vent ana": apres_1DVa
+    "Av pert 1l vent obs": avant_1DV_1l, 
+    "Ap pert 1l vent obs": apres_1DV_1l,
+    "Av pert vent obs": avant_1DV, 
+    "Ap pert vent obs": apres_1DV,
+    "Av pert vent ana": avant_1DVa, 
+    "Ap pert vent ana": apres_1DVa
 }
 
 titre = "Distribution (pdf) des prévisions avant et aprés perturbation"
@@ -179,14 +179,14 @@ titre_variable = "Distribution de probabilité"
 xlabel = "Prévisions"
 ylabel = "Fréquences relatives"
 
-# graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=False)
+graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=False)
 
 titre = "Distribution (cdf) des prévisions avant et aprés perturbation"
 titre_variable = "Distribution cummulée de probabilité"
 xlabel = "Prévisions"
 ylabel = "Fréquences cumulées"
 
-# graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=True)
+graphic_pdf_cdf(dict_all, 2, 3, titre, titre_variable, xlabel, ylabel, CDF=True)
 
 "Si maintenant on réalise la même analyse que avant mais avec "
 "les valeurs corrigées, on va peut-être avoir des meilleurs "
@@ -239,7 +239,7 @@ two_FHVa90 = np.hstack((FHVa90_ap, FHVa90))
 dict_ROC_ap = {"Vent_obs_50_ap": two_FHV50, "Vent_obs_90_ap": two_FHV90,
             "Vent_analyse_50_ap": two_FHVa50, "Vent_analyse_90_ap": two_FHVa90}
 
-# graphsExec(Fiab, Acuite, ROC, dict_fiab_ap, pc_ap, dict_acuite_ap, dict_ROC_ap, [50, 90], 2)
+graphsExec(Fiab, Acuite, ROC, dict_fiab_ap, pc_ap, dict_acuite_ap, dict_ROC_ap, [50, 90], 2)
 
 # RMSE VS. ÉCART-TYPE
 #####################
@@ -265,13 +265,6 @@ ectVa_av.append(RMSEcheck(prevVa, obsVa)[1])
 
 rmseVa_ap.append(RMSEcheck(prevVa_ap, obsVa)[0])
 ectVa_ap.append(RMSEcheck(prevVa_ap, obsVa)[1])
-
-
-# rmseV_av, ectV_lignes_av = RMSEcheck(prevV, obsV)
-# rmseV_ap, ectV_lignes_ap = RMSEcheck(prevV_ap, obsV)
-
-# rmseVa_av, ectVa_lignes_av = RMSEcheck(prevVa, obsVa)
-# rmseVa_ap, ectVa_lignes_ap = RMSEcheck(prevVa_ap, obsVa)
 
 print("Vent obs avant: RMSE, écart type", rmseV_av, ectV_av)
 print("Vent obs apres: RMSE, écart type", rmseV_ap, ectV_ap)
